@@ -1,21 +1,21 @@
 use std::fmt;
-use std::fmt::Formatter;
+use std::fmt::{Formatter, Display};
 use std::slice::Iter;
 use std::iter::Map;
 
 #[derive(Debug)]
 pub struct BitSet {
-    size: u32,
+    size: usize,
     data: Vec<u8>,
 }
 
 impl BitSet {
-    pub fn new(size: u32) -> BitSet {
+    pub fn new(size: usize) -> BitSet {
         let num_bytes: usize = (size as f32 / 8.0).ceil() as usize;
         BitSet { size, data: vec![0; num_bytes] }
     }
 
-    fn get_position(&self, i: u32) -> Option<(u32, u32)> {
+    fn get_position(&self, i: usize) -> Option<(usize, usize)> {
         if i >= self.size {
             None
         } else {
@@ -25,7 +25,7 @@ impl BitSet {
         }
     }
 
-    pub fn set(&mut self, index: u32) -> Result<(), String> {
+    pub fn set(&mut self, index: usize) -> Result<(), String> {
         if let Some((index, offset)) = self.get_position(index) {
             self.data[index as usize] |= 1 << offset;
             Ok(())
@@ -34,7 +34,7 @@ impl BitSet {
         }
     }
 
-    pub fn get(&self, index: u32) -> Option<bool> {
+    pub fn get(&self, index: usize) -> Option<bool> {
         if index >= self.size {
             None
         } else {
@@ -51,21 +51,42 @@ impl fmt::Display for BitSet {
             .map(|byte| format!("{:08b}", byte))
             .map(|byte_string| byte_string.chars().rev().collect::<String>())
             .collect::<String>();
-        write!(f, "{}", bit_string)
+        write!(f, "{}", &bit_string[0..self.size])
     }
 }
 
 #[test]
-fn test1() {
+fn test_set_all_values() {
     let mut bs = BitSet::new(10);
-    bs.set(0);
+    let values = [
+        "1000000000",
+        "1100000000",
+        "1110000000",
+        "1111000000",
+        "1111100000",
+        "1111110000",
+        "1111111000",
+        "1111111100",
+        "1111111110",
+        "1111111111"
+    ];
 
-    assert_eq!(bs.size, 10);
-    println!("{}", bs);
-    println!("{:?}", bs);
+    for i in 0..10 {
+        bs.set(i);
+        assert_eq!(values[i], format!("{}", bs));
+    }
 }
 
 #[test]
-fn test2() {
-    // assert!(false);
+fn test_set() {
+    let size = 10;
+
+    let bs = BitSet::new(size);
+
+    // (0..size).for_each(|n| !bs.get(n))
+    // bs.iter().all(|x| x)
+
 }
+
+#[test]
+fn test_get() {}
