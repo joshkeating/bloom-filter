@@ -5,7 +5,7 @@ use std::iter::Map;
 
 #[derive(Debug)]
 pub struct BitSet {
-    size: usize,
+    pub size: usize,
     data: Vec<u8>,
 }
 
@@ -13,16 +13,6 @@ impl BitSet {
     pub fn new(size: usize) -> BitSet {
         let num_bytes: usize = (size as f32 / 8.0).ceil() as usize;
         BitSet { size, data: vec![0; num_bytes] }
-    }
-
-    fn get_position(&self, i: usize) -> Option<(usize, usize)> {
-        if i >= self.size {
-            None
-        } else {
-            let index = i / 8;
-            let offset = i % 8;
-            Some((index, offset))
-        }
     }
 
     pub fn set(&mut self, index: usize) -> Result<(), String> {
@@ -39,6 +29,16 @@ impl BitSet {
             Some((self.data[index] >> offset) & 1 != 0)
         } else {
             None
+        }
+    }
+
+    fn get_position(&self, i: usize) -> Option<(usize, usize)> {
+        if i >= self.size {
+            None
+        } else {
+            let index = i / 8;
+            let offset = i % 8;
+            Some((index, offset))
         }
     }
 }
