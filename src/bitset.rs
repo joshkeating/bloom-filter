@@ -35,10 +35,10 @@ impl BitSet {
     }
 
     pub fn get(&self, index: usize) -> Option<bool> {
-        if index >= self.size {
-            None
+        if let Some((index, offset)) = self.get_position(index) {
+            Some((self.data[index] >> offset) & 1 != 0)
         } else {
-            Some(false)
+            None
         }
     }
 }
@@ -56,7 +56,7 @@ impl fmt::Display for BitSet {
 }
 
 #[test]
-fn test_set_all_values() {
+fn test_fmt() {
     let mut bs = BitSet::new(10);
     let values = [
         "1000000000",
@@ -79,14 +79,28 @@ fn test_set_all_values() {
 
 #[test]
 fn test_set() {
-    let size = 10;
-
-    let bs = BitSet::new(size);
-
-    // (0..size).for_each(|n| !bs.get(n))
-    // bs.iter().all(|x| x)
-
+    // let size = 10;
+    // let bs = BitSet::new(size);
+    //
+    // (0..size).iter().all()
+    // // bs.iter().all(|x| x)
 }
 
 #[test]
-fn test_get() {}
+fn test_get() {
+    let mut bs = BitSet::new(10);
+
+    // Out of bounds is None
+    assert!(bs.get(11).is_none());
+
+    // Default value is false
+    assert_eq!(bs.get(0).unwrap(), false);
+
+    // Value is true after setting
+    bs.set(0);
+    assert_eq!(bs.get(0).unwrap(), true);
+
+    // Value is still true after setting again
+    bs.set(0);
+    assert_eq!(bs.get(0).unwrap(), true);
+}
