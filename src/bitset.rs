@@ -6,6 +6,7 @@ use std::iter::Map;
 #[derive(Debug)]
 pub struct BitSet {
     pub size: usize,
+    // TODO: does this leave unused memory (word size ptrs)?
     data: Vec<u8>,
 }
 
@@ -16,30 +17,34 @@ impl BitSet {
     }
 
     pub fn set(&mut self, index: usize) -> Result<(), String> {
-        if let Some((index, offset)) = self.get_position(index) {
-            self.data[index as usize] |= 1 << offset;
-            Ok(())
-        } else {
-            Err(format!("index out of bounds: {i}", i = index))
+        match self.get_position(index) {
+            Ok((index, offset)) => {
+                Ok((self.data[index as usize] |= 1 << offset))
+            }
+            Err(msg) => {
+                Err(msg)
+            }
         }
     }
 
-    pub fn get(&self, index: usize) -> Option<bool> {
-        if let Some((index, offset)) = self.get_position(index) {
-            Some((self.data[index] >> offset) & 1 != 0)
-        } else {
-            None
+    pub fn get(&self, index: usize) -> Result<bool, String> {
+        match self.get_position(index) {
+            Ok((index, offset)) => {
+                Ok((self.data[index] >> offset) & 1 != 0)
+            }
+            Err(msg) => {
+                Err(msg)
+            }
         }
     }
 
-    fn get_position(&self, i: usize) -> Option<(usize, usize)> {
-        // TODO: check lower bound
-        if i >= self.size {
-            None
+    fn get_position(&self, i: usize) -> Result<(usize, usize), String> {
+        if i < 0 || i >= self.size {
+            Err(format!("index out of bounds: {i}", i = i))
         } else {
             let index = i / 8;
             let offset = i % 8;
-            Some((index, offset))
+            Ok((index, offset))
         }
     }
 }
@@ -91,8 +96,8 @@ fn test_set() {
 fn test_get() {
     let mut bs = BitSet::new(10);
 
-    // Out of bounds is None
-    assert!(bs.get(11).is_none());
+    // Out of bounds is Err
+    assert!(bs.get(11).is_err());
 
     // Default value is false
     assert_eq!(bs.get(0).unwrap(), false);

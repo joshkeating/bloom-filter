@@ -59,7 +59,19 @@ fn test_insert() {
     let y = "goodbye";
 
     let mut bloom = Bloom::new(32, 1);
+
+    assert!(!bloom.contains(x));
+    assert!(!bloom.contains(y));
+
     bloom.insert(x);
+    assert!(bloom.contains(x));
     bloom.insert(x);
+    assert!(bloom.contains(x));
     bloom.insert(y);
+    assert!(bloom.contains(y));
+}
+
+#[test]
+fn test_collision() {
+    // TODO: simulate a collision
 }
