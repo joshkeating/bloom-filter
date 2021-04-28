@@ -33,6 +33,7 @@ impl BitSet {
     }
 
     fn get_position(&self, i: usize) -> Option<(usize, usize)> {
+        // TODO: check lower bound
         if i >= self.size {
             None
         } else {

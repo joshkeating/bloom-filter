@@ -1,10 +1,8 @@
-/*
-  A Bloom filter library
-  Authors: Josh Keating, Phillip Quinn, Sam Gehman
-
-  https://florian.github.io/bloom-filters/
-  https://llimllib.github.io/bloomfilter-tutorial/
-*/
+/// A Bloom filter library
+/// Authors: Sam Gehman, Josh Keating, Phillip Quinn
+///
+/// https://florian.github.io/bloom-filters/
+/// https://llimllib.github.io/bloomfilter-tutorial/
 
 use std::collections::hash_map::RandomState;
 use std::hash::{BuildHasher, Hash, Hasher};
@@ -33,7 +31,18 @@ impl Bloom {
         }
     }
 
-    pub fn contains<T: Hash>(&self, value: T) {}
+    // TODO: rename to "maybe contains"
+    pub fn contains<T: Hash>(&self, value: T) -> bool {
+        for i in self.get_indices(value) {
+            // If any of the bits are 0, the value is guaranteed to not be in the set
+            if !self.bitset.get(i).unwrap() {
+                return false;
+            }
+        }
+
+        // The value may be in the set
+        return true;
+    }
 
     fn get_indices<T: Hash>(&self, value: T) -> Vec<usize> {
         self.random_states.iter().map(|random_state| {
